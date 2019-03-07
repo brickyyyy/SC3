@@ -73,6 +73,8 @@ transformation <- function(dists, method) {
 #' @param clusts a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
+#' @useDynLib SC3
+#' @importFrom Rcpp sourceCpp
 get_consensus_matrix <- function(clusts, k) {
   res = calc_consensus(clusts, k)
   colnames(res)<-colnames(clusts)
@@ -91,6 +93,8 @@ get_consensus_matrix <- function(clusts, k) {
 #' @param matrix a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
+#' @useDynLib SC3
+#' @importFrom Rcpp sourceCpp
 calc_consensus<-function(matrix, k) {
   #constructing a binary matrix for the cluster identities n
   n = ncol(matrix)
@@ -115,6 +119,8 @@ calc_consensus<-function(matrix, k) {
 #' 
 #' @param v vector containing clustering results
 #' @return binary similarity matrix
+#' @useDynLib SC3
+#' @importFrom Rcpp sourceCpp
 FindSimilarities = function(v){
   l = length(v)
   df = matrix(0L,nrow = l, ncol = l)
