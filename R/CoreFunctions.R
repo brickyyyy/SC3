@@ -68,27 +68,6 @@ transformation <- function(dists, method) {
 }
 
 #' #' Calculate consensus matrix
-#' #'
-#' #' Consensus matrix is calculated using the Cluster-based Similarity 
-#' #' Partitioning Algorithm (CSPA). For each clustering solution a binary 
-#' #' similarity matrix is constructed from the corresponding cell labels: 
-#' #' if two cells belong to the same cluster, their similarity is 1, otherwise 
-#' #' the similarity is 0. A consensus matrix is calculated by averaging all 
-#' #' similarity matrices.
-#' #'
-#' #' @param clusts a matrix containing clustering solutions in columns
-#' #' @return consensus matrix
-#' #' 
-#' #' @useDynLib SC3
-#' #' @importFrom Rcpp sourceCpp
-#' #' @export
-#' consensus_matrix <- function(clusts) {
-#'     res <- consmx(clusts)
-#'     colnames(res) <- as.character(c(1:nrow(clusts)))
-#'     rownames(res) <- as.character(c(1:nrow(clusts)))
-#'     return(res)
-#' }
-#' #' Calculate consensus matrix
 #'
 #' Consensus matrix is calculated using the Cluster-based Similarity 
 #' Partitioning Algorithm (CSPA). For each clustering solution a binary 

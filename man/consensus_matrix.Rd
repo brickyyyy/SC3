@@ -2,12 +2,14 @@
 % Please edit documentation in R/CoreFunctions.R
 \name{consensus_matrix}
 \alias{consensus_matrix}
-\title{Calculate consensus matrix}
+\title{#' Calculate consensus matrix}
 \usage{
-consensus_matrix(clusts)
+consensus_matrix(clusts, k)
 }
 \arguments{
 \item{clusts}{a matrix containing clustering solutions in columns}
+
+\item{k}{number of clusters}
 }
 \value{
 consensus matrix
