@@ -543,7 +543,7 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
   doParallel::registerDoParallel(cl, cores = n_cores)
   
   
-  cons <- foreach::foreach(i = ks, .export=ls(envir=globalenv())) %dorng% {
+  cons <- foreach::foreach(i = ks, .export=c("get_consensus_matrix","calc_consensus", "FindSimilarities")) %dorng% {
     try({
       # d <- k.means[grep(paste0("_", i, "_"), names(k.means))]
       #  d <- matrix(unlist(d), nrow = length(d[[1]]))
