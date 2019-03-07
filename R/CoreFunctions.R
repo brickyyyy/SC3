@@ -81,9 +81,9 @@ transformation <- function(dists, method) {
 #' @return consensus matrix
 #' 
 #' @useDynLib SC3
-#' @export
-consensus_matrix <- function(clusts,k) {
-  res = calc_consensus(clusts,k)
+#'
+consensus_matrix <- function(clusts, k) {
+  res = calc_consensus(clusts, k)
   colnames(res)<-colnames(clusts)
   res=kmeans(x=res, centers = k)
   return(res)
