@@ -465,7 +465,7 @@ sc3_kmeans.SingleCellExperiment <- function(object, ks) {
     
     pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
     
-    # calculate the 6 distinct transformations in parallel
+    # calculate the 3 distinct transformations in parallel
     labs <- foreach::foreach(i = 1:nrow(hash.table)) %dorng% {
         try({
             utils::setTxtProgressBar(pb, i)
@@ -519,8 +519,6 @@ setMethod("sc3_kmeans", signature(object = "SingleCellExperiment"), sc3_kmeans.S
 #' @import cluster
 #' @import plyr
 #' @importFrom stats hclust dist as.dist
-#' 
-#' @useDynLib SC3
 sc3_calc_consens.SingleCellExperiment <- function(object) {
   k.means <- metadata(object)$sc3$kmeans
   if (is.null(k.means)) {
