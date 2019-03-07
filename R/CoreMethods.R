@@ -553,22 +553,7 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
       matrix.toCluster<-matrix.rows
       colnames(matrix.toCluster)<-matrix.cols
       
-      #res <- get_consensus_matrix(matrix.toCluster, i)
-      n = ncol(matrix.toCluster)
-      c = nrow(matrix.toCluster)
-      b = matrix(0L,nrow = n,ncol = c*i)
-
-      for (t in 1:n) {
-        for (j in 1:c) {
-          value = matrix[j,t]+k*(j-1)
-          b[t,value] <- 1
-        }
-      }
-        res=t(b)/(n*c)
-        
-      colnames(res)<-colnames(clusts)
-      res=kmeans(x=res, centers = i)
-        
+      res <- get_consensus_matrix(matrix.toCluster, i)
       dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
       
       toList = plyr::alply(dat,1)
