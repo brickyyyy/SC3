@@ -371,8 +371,7 @@ sc3_calc_transfs.SingleCellExperiment <- function(object) {
     i <- NULL
     
     distances <- names(dists)
-    transformations <- c("pca", "laplacian")
-    
+    transformations <- c("laplacian")    
     n_dim <- metadata(object)$sc3$n_dim
     
     hash.table <- expand.grid(dists = distances, transfs = transformations, stringsAsFactors = FALSE)
@@ -518,80 +517,98 @@ setMethod("sc3_kmeans", signature(object = "SingleCellExperiment"), sc3_kmeans.S
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @import cluster
+#' @import plyr
 #' @importFrom stats hclust dist as.dist
 #' 
 #' @useDynLib SC3
 #' @import Rcpp
 sc3_calc_consens.SingleCellExperiment <- function(object) {
-    k.means <- metadata(object)$sc3$kmeans
-    if (is.null(k.means)) {
-        stop(paste0("Please run sc3_kmeans() first!"))
-        return(object)
-    }
-    
-    # NULLing the variables to avoid notes in R CMD CHECK
-    i <- NULL
-    
-    ks <- as.numeric(unique(unlist(lapply(strsplit(names(k.means), "_"), "[[", 3))))
-    
-    if (metadata(object)$sc3$n_cores > length(ks)) {
-        n_cores <- length(ks)
-    } else {
-        n_cores <- metadata(object)$sc3$n_cores
-    }
-    
-    message("Calculating consensus matrix...")
-    
-    cl <- parallel::makeCluster(n_cores, outfile = "")
-    doParallel::registerDoParallel(cl, cores = n_cores)
-    
-    cons <- foreach::foreach(i = ks) %dorng% {
-        try({
-            d <- k.means[grep(paste0("_", i, "_"), names(k.means))]
-            d <- matrix(unlist(d), nrow = length(d[[1]]))
-            dat <- consensus_matrix(d)
-            tmp <- ED2(dat)
-            colnames(tmp) <- as.character(colnames(dat))
-            rownames(tmp) <- as.character(colnames(dat))
-            diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
-            hc <- stats::hclust(diss)
-            clusts <- reindex_clusters(hc, i)
-            
-            silh <- cluster::silhouette(clusts, diss)
-            
-            list(consensus = dat, hc = hc, silhouette = silh)
-        })
-    }
-    
-    # stop local cluster
-    parallel::stopCluster(cl)
-    
-    names(cons) <- ks
-    if(is.null(metadata(object)$sc3$consensus)) {
-        metadata(object)$sc3$consensus <- list()
-    }
-    for (n in names(cons)) {
-        metadata(object)$sc3$consensus[[n]] <- cons[[n]]
-    }
-    
-    # remove kmeans results after calculating consensus
-    metadata(object)$sc3$kmeans <- NULL
-    
-    p_data <- colData(object)
-    for (k in ks) {
-        hc <- metadata(object)$sc3$consensus[[as.character(k)]]$hc
-        clusts <- reindex_clusters(hc, k)
-        # in case of hybrid SVM approach
-        if (!is.null(metadata(object)$sc3$svm_train_inds)) {
-            tmp <- rep(NA, nrow(p_data))
-            tmp[metadata(object)$sc3$svm_train_inds] <- clusts
-            clusts <- tmp
-        }
-        p_data[, paste0("sc3_", k, "_clusters")] <- factor(clusts, levels = sort(unique(clusts)))
-    }
-    colData(object) <- as(p_data, "DataFrame")
-    
+  k.means <- metadata(object)$sc3$kmeans
+  if (is.null(k.means)) {
+    stop(paste0("Please run sc3_kmeans() first!"))
     return(object)
+  }
+  
+  # NULLing the variables to avoid notes in R CMD CHECK
+  i <- NULL
+  #range of ks on which we have ran the kmeans
+  ks <- as.numeric(unique(unlist(lapply(strsplit(names(k.means), "_"), "[[", 3))))
+  
+  if (metadata(object)$sc3$n_cores > length(ks)) {
+    n_cores <- length(ks)
+  } else {
+    n_cores <- metadata(object)$sc3$n_cores
+  }
+  
+  message("Calculating consensus matrix...")
+  
+  cl <- parallel::makeCluster(n_cores, outfile = "")
+  doParallel::registerDoParallel(cl, cores = n_cores)
+  
+  
+  cons <- foreach::foreach(i = ks) %dorng% {
+    try({
+      # d <- k.means[grep(paste0("_", i, "_"), names(k.means))]
+      #  d <- matrix(unlist(d), nrow = length(d[[1]]))
+      
+      matrix.cols<-names(k.means)
+      matrix.rows<-matrix(unlist(k.means), ncol = length(matrix.cols))
+      matrix.toCluster<-matrix.rows
+      colnames(matrix.toCluster)<-matrix.cols
+      res <- consensus_matrix(matrix.toCluster, ks)
+      dat<-matrix(data=res$cluster, ncol = length(res$cluster)/ks, nrow = ks)
+      
+      # colnames(dat)<-c(1:(length(res$cluster)/ks))
+      # rownames(dat)<-c(1:ks)
+      # tmp <- ED2(dat)
+      
+      toList = plyr::alply(dat,1)
+      allCons = lapply(toList,FUN = FindSimilarities)
+      dat = Reduce("+", allCons)
+      colnames(dat) = c(1:ncol(dat))
+      rownames(dat) = c(1:nrow(dat))
+      tmp = ED2(dat)
+      
+      diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
+      
+      hc <- stats::hclust(diss)
+      clusts <- reindex_clusters(hc, i)
+      
+      silh <- cluster::silhouette(clusts, diss)
+      
+      list(consensus = dat, hc = hc, silhouette = silh)
+    })
+  }
+  
+  # stop local cluster
+  parallel::stopCluster(cl)
+  
+  names(cons) <- ks
+  if(is.null(metadata(object)$sc3$consensus)) {
+    metadata(object)$sc3$consensus <- list()
+  }
+  for (n in names(cons)) {
+    metadata(object)$sc3$consensus[[n]] <- cons[[n]]
+  }
+  metadata(object)$sc3$bla<-cons
+  #remove kmeans results after calculating consensus
+  metadata(object)$sc3$kmeans <- NULL
+  
+  p_data <- colData(object)
+  for (k in ks) {
+    hc <- metadata(object)$sc3$consensus[[as.character(k)]]$hc
+    clusts <- reindex_clusters(hc, k)
+    # in case of hybrid SVM approach
+    if (!is.null(metadata(object)$sc3$svm_train_inds)) {
+      tmp <- rep(NA, nrow(p_data))
+      tmp[metadata(object)$sc3$svm_train_inds] <- clusts
+      clusts <- tmp
+    }
+    p_data[, paste0("sc3_", k, "_clusters")] <- factor(clusts, levels = sort(unique(clusts)))
+  }
+  colData(object) <- as(p_data, "DataFrame")
+  
+  return(object)
 }
 
 #' @rdname sc3_calc_consens

@@ -55,10 +55,11 @@ calculate_distance <- function(data, method) {
 #' @importFrom stats prcomp cmdscale
 #'
 transformation <- function(dists, method) {
-    if (method == "pca") {
-        t <- prcomp(dists, center = TRUE, scale. = TRUE)
-        return(t$rotation)
-    } else if (method == "laplacian") {
+    # if (method == "pca") {
+    #     t <- prcomp(dists, center = TRUE, scale. = TRUE)
+    #     return(t$rotation)
+    # } 
+      if (method == "laplacian") {
         L <- norm_laplacian(dists)
         l <- eigen(L)
         # sort eigenvectors by their eigenvalues
@@ -66,7 +67,28 @@ transformation <- function(dists, method) {
     }
 }
 
-#' Calculate consensus matrix
+#' #' Calculate consensus matrix
+#' #'
+#' #' Consensus matrix is calculated using the Cluster-based Similarity 
+#' #' Partitioning Algorithm (CSPA). For each clustering solution a binary 
+#' #' similarity matrix is constructed from the corresponding cell labels: 
+#' #' if two cells belong to the same cluster, their similarity is 1, otherwise 
+#' #' the similarity is 0. A consensus matrix is calculated by averaging all 
+#' #' similarity matrices.
+#' #'
+#' #' @param clusts a matrix containing clustering solutions in columns
+#' #' @return consensus matrix
+#' #' 
+#' #' @useDynLib SC3
+#' #' @importFrom Rcpp sourceCpp
+#' #' @export
+#' consensus_matrix <- function(clusts) {
+#'     res <- consmx(clusts)
+#'     colnames(res) <- as.character(c(1:nrow(clusts)))
+#'     rownames(res) <- as.character(c(1:nrow(clusts)))
+#'     return(res)
+#' }
+#' #' Calculate consensus matrix
 #'
 #' Consensus matrix is calculated using the Cluster-based Similarity 
 #' Partitioning Algorithm (CSPA). For each clustering solution a binary 
@@ -76,17 +98,71 @@ transformation <- function(dists, method) {
 #' similarity matrices.
 #'
 #' @param clusts a matrix containing clustering solutions in columns
+#' @param k number of clusters
 #' @return consensus matrix
 #' 
 #' @useDynLib SC3
 #' @importFrom Rcpp sourceCpp
 #' @export
-consensus_matrix <- function(clusts) {
-    res <- consmx(clusts)
-    colnames(res) <- as.character(c(1:nrow(clusts)))
-    rownames(res) <- as.character(c(1:nrow(clusts)))
-    return(res)
+consensus_matrix <- function(clusts,k) {
+  res = calc_consensus(clusts,k)
+  colnames(res)<-colnames(clusts)
+  res=kmeans(x=res, centers = k)
+  return(res)
 }
+
+#' Calculate consensus matrix2
+#'
+#' For each clustering solution a binary
+#' similarity matrix is constructed from the corresponding cell labels:
+#' if two cells belong to the same cluster, their similarity is 1, otherwise
+#' the similarity is 0. A consensus matrix is calculated by averaging all
+#' similarity matrices.
+#'
+#' @param matrix a matrix containing clustering solutions in columns
+#' @param k number of clusters
+#' @return consensus matrix
+#'
+#' @useDynLib SC3
+calc_consensus<-function(matrix, k) {
+  #constructing a binary matrix for the cluster identities n
+  n = ncol(matrix)
+  c = nrow(matrix)
+  b = matrix(0L,nrow = n,ncol = c*k)
+  message("Calculating consensus matrix...")
+  for (i in 1:n) {
+    for (j in 1:c) {
+      value = matrix[j,i]+k*(j-1)
+      b[i,value] <- 1
+    }
+  }
+  
+  inputMatrix=t(b)/(n*c)
+  #add tolerance at convergence=1e-10.
+  return (inputMatrix)
+}
+
+#' Creates a binary similarity matrix for every clustering created using the consensus algorithm and clustering with k-means after that.
+#' 
+#' Finds whether 2 cells belong to the same cluster in a given clustering result.
+#' 
+#' @param v vector containing clustering results
+#' @return binary similarity matrix
+#' 
+#' @useDynLib SC3
+FindSimilarities = function(v){
+  l = length(v)
+  df = matrix(0L,nrow = l, ncol = l)
+  for (i in 1:length(v)){
+    for (j in 1:length(v)){
+      if(v[i]==v[j]){
+        df[i,j]<-1  
+      }
+    }
+  }
+  return (df)
+}
+
 
 #' Run support vector machines (\code{SVM}) prediction
 #'
