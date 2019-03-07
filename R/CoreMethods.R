@@ -557,6 +557,7 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
       n = ncol(matrix.toCluster)
       c = nrow(matrix.toCluster)
       b = matrix(0L,nrow = n,ncol = c*i)
+
       for (t in 1:n) {
         for (j in 1:c) {
           value = matrix[j,t]+k*(j-1)
