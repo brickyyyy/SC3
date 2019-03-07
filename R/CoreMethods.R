@@ -555,8 +555,8 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
       matrix.rows<-matrix(unlist(k.means), ncol = length(matrix.cols))
       matrix.toCluster<-matrix.rows
       colnames(matrix.toCluster)<-matrix.cols
-      res <- consensus_matrix(matrix.toCluster, ks)
-      dat<-matrix(data=res$cluster, ncol = length(res$cluster)/ks, nrow = ks)
+      res <- consensus_matrix(matrix.toCluster, i)
+      dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
       
       # colnames(dat)<-c(1:(length(res$cluster)/ks))
       # rownames(dat)<-c(1:ks)
