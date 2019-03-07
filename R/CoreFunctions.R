@@ -76,7 +76,19 @@ transformation <- function(dists, method) {
 #' @useDynLib SC3
 #' @importFrom Rcpp sourceCpp
 get_consensus_matrix <- function(clusts, k) {
-  res = calc_consensus(clusts, k)
+  #res = calc_consensus(clusts, k)
+  n = ncol(clusts)
+  c = nrow(clusts)
+  b = matrix(0L,nrow = n,ncol = c*k)
+  #message("Calculating consensus matrix...")
+  for (i in 1:n) {
+    for (j in 1:c) {
+      value = clusts[j,i]+k*(j-1)
+      b[i,value] <- 1
+    }
+  }
+  
+  res=t(b)/(n*c)
   colnames(res)<-colnames(clusts)
   res=kmeans(x=res, centers = k)
   return(res)
