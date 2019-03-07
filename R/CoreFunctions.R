@@ -81,7 +81,6 @@ transformation <- function(dists, method) {
 #' @return consensus matrix
 #' 
 #' @useDynLib SC3
-#' @importFrom Rcpp sourceCpp
 #' @export
 consensus_matrix <- function(clusts,k) {
   res = calc_consensus(clusts,k)

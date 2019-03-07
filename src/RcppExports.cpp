@@ -28,17 +28,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// consmx
-arma::mat consmx(const arma::mat dat);
-RcppExport SEXP _SC3_consmx(SEXP datSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat >::type dat(datSEXP);
-    rcpp_result_gen = Rcpp::wrap(consmx(dat));
-    return rcpp_result_gen;
-END_RCPP
-}
 // norm_laplacian
 arma::mat norm_laplacian(arma::mat A);
 RcppExport SEXP _SC3_norm_laplacian(SEXP ASEXP) {
@@ -65,7 +54,6 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_SC3_ED1", (DL_FUNC) &_SC3_ED1, 1},
     {"_SC3_ED2", (DL_FUNC) &_SC3_ED2, 1},
-    {"_SC3_consmx", (DL_FUNC) &_SC3_consmx, 1},
     {"_SC3_norm_laplacian", (DL_FUNC) &_SC3_norm_laplacian, 1},
     {"_SC3_tmult", (DL_FUNC) &_SC3_tmult, 1},
     {NULL, NULL, 0}

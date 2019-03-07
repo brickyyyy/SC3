@@ -20,15 +20,6 @@ ED2 <- function(x) {
     .Call('_SC3_ED2', PACKAGE = 'SC3', x)
 }
 
-#' Consensus matrix computation
-#' 
-#' Computes consensus matrix given cluster labels
-#' 
-#' @param dat a matrix containing clustering solutions in columns
-consmx <- function(dat) {
-    .Call('_SC3_consmx', PACKAGE = 'SC3', dat)
-}
-
 #' Graph Laplacian calculation
 #' 
 #' Calculate graph Laplacian of a symmetrix matrix

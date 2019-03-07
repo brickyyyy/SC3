@@ -402,7 +402,7 @@ sc3_calc_transfs.SingleCellExperiment <- function(object) {
     
     metadata(object)$sc3$transformations <- transfs
     # remove distances after calculating transformations
-    metadata(object)$sc3$distances <- NULL
+    #metadata(object)$sc3$distances <- NULL
     return(object)
 }
 
@@ -558,10 +558,6 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
       res <- consensus_matrix(matrix.toCluster, i)
       dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
       
-      # colnames(dat)<-c(1:(length(res$cluster)/ks))
-      # rownames(dat)<-c(1:ks)
-      # tmp <- ED2(dat)
-      
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
@@ -592,7 +588,7 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
   }
   metadata(object)$sc3$bla<-cons
   #remove kmeans results after calculating consensus
-  metadata(object)$sc3$kmeans <- NULL
+ # metadata(object)$sc3$kmeans <- NULL
   
   p_data <- colData(object)
   for (k in ks) {

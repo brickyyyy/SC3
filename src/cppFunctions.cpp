@@ -49,31 +49,6 @@ Rcpp::NumericMatrix ED2(const Rcpp::NumericMatrix & x) {
 	return out;
 }
 
-//' Consensus matrix computation
-//' 
-//' Computes consensus matrix given cluster labels
-//' 
-//' @param dat a matrix containing clustering solutions in columns
-// [[Rcpp::export]]
-arma::mat consmx(const arma::mat dat) {
-
-	mat res = dat.n_cols * eye<mat>( dat.n_rows, dat.n_rows );
-
-	int i, j, k;
-	for (j = 0; j < dat.n_cols; j++) {
-		for (i = 0; i < dat.n_rows; i++) {
-			for (k = i + 1; k < dat.n_rows; k++) {
-				if (dat(i, j) == dat(k, j)) {
-				    res(i, k)++;
-					res(k, i)++;
-				}
-			}
-		}
-	}
-	res /= dat.n_cols;
-	return res;
-}
-
 //' Graph Laplacian calculation
 //' 
 //' Calculate graph Laplacian of a symmetrix matrix
