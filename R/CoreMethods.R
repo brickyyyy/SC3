@@ -521,7 +521,6 @@ setMethod("sc3_kmeans", signature(object = "SingleCellExperiment"), sc3_kmeans.S
 #' @importFrom stats hclust dist as.dist
 #' 
 #' @useDynLib SC3
-#' @import Rcpp
 sc3_calc_consens.SingleCellExperiment <- function(object) {
   k.means <- metadata(object)$sc3$kmeans
   if (is.null(k.means)) {
@@ -555,7 +554,8 @@ sc3_calc_consens.SingleCellExperiment <- function(object) {
       matrix.rows<-matrix(unlist(k.means), ncol = length(matrix.cols))
       matrix.toCluster<-matrix.rows
       colnames(matrix.toCluster)<-matrix.cols
-      res <- consensus_matrix(matrix.toCluster, i)
+      
+      res <- get_consensus_matrix(matrix.toCluster, i)
       dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
       
       toList = plyr::alply(dat,1)
