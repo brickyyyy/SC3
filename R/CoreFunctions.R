@@ -26,7 +26,7 @@
 #'
 #' @importFrom stats cor dist
 #' 
-#' @useDynLib SC3
+#' @useDynLib SC3min
 #' @importFrom Rcpp sourceCpp
 #'
 calculate_distance <- function(data, method) {
@@ -73,7 +73,7 @@ transformation <- function(dists, method) {
 #' @param clusts a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
-#' @useDynLib SC3
+#' @useDynLib SC3min
 #' @importFrom Rcpp sourceCpp
 get_consensus_matrix <- function(clusts, k) {
   #res = calc_consensus(clusts, k)
@@ -105,7 +105,7 @@ get_consensus_matrix <- function(clusts, k) {
 #' @param matrix a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
-#' @useDynLib SC3
+#' @useDynLib SC3min
 #' @importFrom Rcpp sourceCpp
 calc_consensus<-function(matrix, k) {
   #constructing a binary matrix for the cluster identities n
@@ -131,7 +131,7 @@ calc_consensus<-function(matrix, k) {
 #' 
 #' @param v vector containing clustering results
 #' @return binary similarity matrix
-#' @useDynLib SC3
+#' @useDynLib SC3min
 #' @importFrom Rcpp sourceCpp
 FindSimilarities = function(v){
   l = length(v)
@@ -242,10 +242,10 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
         }
     }
     ann <- NULL
-    if (is.null(metadata(object)$sc3$svm_train_inds)) {
+    if (is.null(metadata(object)$sc3min$svm_train_inds)) {
         ann <- colData(object)[, colnames(colData(object)) %in% show_pdata]
     } else {
-        ann <- colData(object)[metadata(object)$sc3$svm_train_inds, colnames(colData(object)) %in% 
+        ann <- colData(object)[metadata(object)$sc3min$svm_train_inds, colnames(colData(object)) %in% 
             show_pdata]
     }
     # remove columns with 1 value only
@@ -289,7 +289,7 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
     return(ann)
 }
 
-#' Get processed dataset used by \code{SC3} clustering
+#' Get processed dataset used by \code{SC3min} clustering
 #' 
 #' Takes data from the \code{logcounts} slot, removes spike-ins and applies the gene filter.
 #' 
@@ -300,8 +300,8 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
 #' @export
 get_processed_dataset <- function(object) {
     dataset <- logcounts(object)
-    if (!is.null(rowData(object)$sc3_gene_filter)) {
-        dataset <- dataset[rowData(object)$sc3_gene_filter, ]
+    if (!is.null(rowData(object)$sc3min_gene_filter)) {
+        dataset <- dataset[rowData(object)$sc3min_gene_filter, ]
     }
     return(dataset)
 }

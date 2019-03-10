@@ -1,23 +1,23 @@
-#' Opens \code{SC3} results in an interactive session in a web browser.
+#' Opens \code{SC3min} results in an interactive session in a web browser.
 #'
-#' Runs interactive \code{shiny} session of \code{SC3} based on precomputed clusterings.
+#' Runs interactive \code{shiny} session of \code{SC3min} based on precomputed clusterings.
 #'
 #' @param object an object of \code{SingleCellExperiment} class
 #'
 #' @return Opens a browser window with an interactive \code{shiny} app and visualize
 #' all precomputed clusterings.
 #' 
-#' @name sc3_interactive
-#' @aliases sc3_interactive, sc3_interactive,SingleCellExperiment-method
+#' @name sc3min_interactive
+#' @aliases sc3min_interactive, sc3min_interactive,SingleCellExperiment-method
 #'
 #' @importFrom shiny HTML actionButton animationOptions checkboxGroupInput column div downloadHandler downloadLink eventReactive fluidPage fluidRow h4 headerPanel htmlOutput need observe observeEvent p plotOutput reactiveValues renderPlot renderUI selectInput shinyApp sliderInput stopApp tabPanel tabsetPanel uiOutput updateSelectInput validate wellPanel withProgress conditionalPanel reactive outputOptions tags radioButtons downloadButton
 #' @importFrom utils head
 #' @importFrom stats median
 #' @importFrom graphics plot
-sc3_interactive.SingleCellExperiment <- function(object) {
-    consensus <- metadata(object)$sc3$consensus
+sc3min_interactive.SingleCellExperiment <- function(object) {
+    consensus <- metadata(object)$sc3min$consensus
     if (is.null(consensus)) {
-        warning(paste0("Please run sc3_calc_consens() first!"))
+        warning(paste0("Please run sc3min_calc_consens() first!"))
         return()
     }
     
@@ -32,14 +32,14 @@ sc3_interactive.SingleCellExperiment <- function(object) {
     values <- reactiveValues()
     
     svm <- FALSE
-    if (!is.null(metadata(object)$sc3$svm_train_inds)) {
+    if (!is.null(metadata(object)$sc3min$svm_train_inds)) {
         svm <- TRUE
-        dataset <- dataset[,metadata(object)$sc3$svm_train_inds]
+        dataset <- dataset[,metadata(object)$sc3min$svm_train_inds]
     }
     
     biology <- FALSE
-    if (!is.null(metadata(object)$sc3$biology)) {
-        if(metadata(object)$sc3$biology) {
+    if (!is.null(metadata(object)$sc3min$biology)) {
+        if(metadata(object)$sc3min$biology) {
             biology <- TRUE
         }
     }
@@ -89,7 +89,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                                          p(HTML(
                                              paste0(
                                                  "<font color = 'red'>Your data was clustered based on ",
-                                                 length(metadata(object)$sc3$svm_train_inds),
+                                                 length(metadata(object)$sc3min$svm_train_inds),
                                                  " selected cells.</font>"
                                              )
                                          )))
@@ -290,7 +290,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                         res <-
                             HTML(
                                 paste0(
-                                    "SC3 found <b>",
+                                    "SC3min found <b>",
                                     values$n.de.genes,
                                     "</b> differentially expressed genes based
                                     on the obtained clustering.<br>",
@@ -299,7 +299,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                                     A significant <i>p</i>-value indicates that gene
                                     expression in at least one cluster
                                     stochastically dominates one other cluster.
-                                    SC3 provides a list of all differentially
+                                    SC3min provides a list of all differentially
                                     expressed genes with adjusted <i>p</i>-values < 0.01
                                     and plots gene expression profiles of the
                                     50 genes with the lowest <i>p</i>-values. Note
@@ -316,7 +316,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                         res <-
                             HTML(
                                 paste0(
-                                    "SC3 found <b>",
+                                    "SC3min found <b>",
                                     values$n.markers,
                                     "</b> marker genes based
                                     on the obtained clustering.<br>",
@@ -349,7 +349,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                     paste0("\nPlease choose k from: ", paste(ks, collapse = " "))
                 ))
                 withProgress(message = 'Plotting...', value = 0, {
-                    sc3_plot_consensus(object, as.numeric(input$clusters), 
+                    sc3min_plot_consensus(object, as.numeric(input$clusters), 
                                        show_pdata = input$pDataColumns)
                 })
             })
@@ -359,7 +359,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                     input$clusters %in% ks,
                     paste0("\nPlease choose k from: ", paste(ks, collapse = " "))
                 ))
-                sc3_plot_silhouette(object, as.numeric(input$clusters))
+                sc3min_plot_silhouette(object, as.numeric(input$clusters))
             })
             # plot stability
             output$StabilityPlot <- renderPlot({
@@ -368,10 +368,10 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                     paste0("\nPlease choose k from: ", paste(ks, collapse = " "))
                 ))
                 validate(need(
-                    length(metadata(object)$sc3$consensus) > 1,
+                    length(metadata(object)$sc3min$consensus) > 1,
                     "\nStability cannot be calculated for a single k value!"
                 ))
-                sc3_plot_cluster_stability(object, input$clusters)
+                sc3min_plot_cluster_stability(object, input$clusters)
             })
             # plot expression matrix
             output$matrix <- renderPlot({
@@ -381,13 +381,13 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                 ))
                 withProgress(message = 'Plotting...', value = 0, {
                     set.seed(1234567)
-                    sc3_plot_expression(object, as.numeric(input$clusters), 
+                    sc3min_plot_expression(object, as.numeric(input$clusters), 
                                         show_pdata = input$pDataColumns)
                 })
             })
             # plot marker genes
             output$mark_genes <- renderPlot({
-                sc3_plot_markers(
+                sc3min_plot_markers(
                     object,
                     as.numeric(input$clusters),
                     as.numeric(input$auroc.threshold),
@@ -401,7 +401,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
             output$plot_mark_genes <- renderUI({
                 validate(need(
                     biology,
-                    "\nPlease run sc3_calc_biology() first!"
+                    "\nPlease run sc3min_calc_biology() first!"
                 ))
                 validate(need(
                     input$clusters %in% ks,
@@ -423,7 +423,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
             })
             # plot DE genes
             output$de_genes <- renderPlot({
-                sc3_plot_de_genes(object,
+                sc3min_plot_de_genes(object,
                                   as.numeric(input$clusters),
                                   as.numeric(input$p.val.de),
                                   show_pdata = input$pDataColumns)
@@ -434,7 +434,7 @@ sc3_interactive.SingleCellExperiment <- function(object) {
             output$plot_de_genes <- renderUI({
                 validate(need(
                     biology,
-                    "\nPlease run sc3_calc_biology() first!"
+                    "\nPlease run sc3min_calc_biology() first!"
                 ))
                 validate(need(
                     input$clusters %in% ks,
@@ -497,6 +497,6 @@ sc3_interactive.SingleCellExperiment <- function(object) {
                         )
                     }
 
-#' @rdname sc3_interactive
-#' @aliases sc3_interactive
-setMethod("sc3_interactive", signature(object = "SingleCellExperiment"), sc3_interactive.SingleCellExperiment)
+#' @rdname sc3min_interactive
+#' @aliases sc3min_interactive
+setMethod("sc3min_interactive", signature(object = "SingleCellExperiment"), sc3min_interactive.SingleCellExperiment)

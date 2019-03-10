@@ -199,17 +199,17 @@ get_marker_genes <- function(dataset, labels) {
 #' @param auroc area under the ROC curve threshold
 #'
 organise_marker_genes <- function(object, k, p_val, auroc) {
-    dat <- rowData(object)[, c(paste0("sc3_", k, "_markers_clusts"), paste0("sc3_", k, 
-        "_markers_auroc"), paste0("sc3_", k, "_markers_padj"), "feature_symbol")]
-    dat <- dat[dat[, paste0("sc3_", k, "_markers_padj")] < p_val & !is.na(dat[, paste0("sc3_", 
+    dat <- rowData(object)[, c(paste0("sc3min_", k, "_markers_clusts"), paste0("sc3min_", k, 
+        "_markers_auroc"), paste0("sc3min_", k, "_markers_padj"), "feature_symbol")]
+    dat <- dat[dat[, paste0("sc3min_", k, "_markers_padj")] < p_val & !is.na(dat[, paste0("sc3min_", 
         k, "_markers_padj")]), ]
-    dat <- dat[dat[, paste0("sc3_", k, "_markers_auroc")] > auroc, ]
+    dat <- dat[dat[, paste0("sc3min_", k, "_markers_auroc")] > auroc, ]
     
     d <- NULL
     
-    for (i in sort(unique(dat[, paste0("sc3_", k, "_markers_clusts")]))) {
-        tmp <- dat[dat[, paste0("sc3_", k, "_markers_clusts")] == i, ]
-        tmp <- tmp[order(tmp[, paste0("sc3_", k, "_markers_auroc")], decreasing = TRUE), ]
+    for (i in sort(unique(dat[, paste0("sc3min_", k, "_markers_clusts")]))) {
+        tmp <- dat[dat[, paste0("sc3min_", k, "_markers_clusts")] == i, ]
+        tmp <- tmp[order(tmp[, paste0("sc3min_", k, "_markers_auroc")], decreasing = TRUE), ]
         d <- rbind(d, tmp)
     }
     
@@ -222,11 +222,11 @@ organise_marker_genes <- function(object, k, p_val, auroc) {
 
 #' Reorder and subset gene markers for plotting on a heatmap
 #' 
-#' Reorders the rows of the input data.frame based on the \code{sc3_k_markers_clusts}
-#' column and also keeps only the top 10 genes for each value of \code{sc3_k_markers_clusts}.
+#' Reorders the rows of the input data.frame based on the \code{sc3min_k_markers_clusts}
+#' column and also keeps only the top 10 genes for each value of \code{sc3min_k_markers_clusts}.
 #'
 #' @param markers a \code{data.frame} object with the following colnames:
-#' \code{sc3_k_markers_clusts}, \code{sc3_k_markers_auroc}, \code{sc3_k_markers_padj}.
+#' \code{sc3min_k_markers_clusts}, \code{sc3min_k_markers_auroc}, \code{sc3min_k_markers_padj}.
 #' 
 markers_for_heatmap <- function(markers) {
     res <- NULL
@@ -281,7 +281,7 @@ get_de_genes <- function(dataset, labels) {
 #' @param p_val p-value threshold
 #' 
 organise_de_genes <- function(object, k, p_val) {
-    de_genes <- rowData(object)[, paste0("sc3_", k, "_de_padj")]
+    de_genes <- rowData(object)[, paste0("sc3min_", k, "_de_padj")]
     names(de_genes) <- rowData(object)$feature_symbol
     de_genes <- de_genes[!is.na(de_genes)]
     de_genes <- de_genes[de_genes < p_val]
@@ -296,7 +296,7 @@ organise_de_genes <- function(object, k, p_val) {
 #' 1 means that the same cluster appears in every solution for different \code{k}.
 #' 
 #' Imagine a given cluster is split into \code{N} clusters when \code{k} is changed (all possible
-#' values of \code{k} are provided via \code{ks} argument in the main \code{sc3} function). 
+#' values of \code{k} are provided via \code{ks} argument in the main \code{sc3min} function). 
 #' In each of the new clusters there are \code{given_cells} of the given cluster and also some 
 #' \code{extra_cells} from other clusters. Then we define stability as follows:
 #' 
@@ -305,7 +305,7 @@ organise_de_genes <- function(object, k, p_val) {
 #' Where one \code{N} corrects for the number of clusters and the other \code{N} is a penalty 
 #' for splitting the cluster. \code{ks} corrects for the range of \code{k}.
 #'
-#' @param consensus consensus item of the sc3 slot of an object of 'SingleCellExperiment' class
+#' @param consensus consensus item of the sc3min slot of an object of 'SingleCellExperiment' class
 #' @param k number of clusters k
 #' @return a numeric vector containing a stability index of each cluster
 calculate_stability <- function(consensus, k) {

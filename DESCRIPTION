@@ -1,4 +1,4 @@
-Package: SC3
+Package: SC3min
 Type: Package
 Title: Single-Cell Consensus Clustering
 Version: 1.0.1
