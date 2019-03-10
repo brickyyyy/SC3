@@ -292,7 +292,7 @@ setMethod("sc3min_estimate_k", signature(object = "SingleCellExperiment"), sc3mi
 #' @importFrom doRNG %dorng%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
+#' @importFrom doFuture registerDoFuture
 sc3min_calc_dists.SingleCellExperiment <- function(object) {
     dataset <- get_processed_dataset(object)
     
@@ -314,22 +314,24 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
         n_cores <- metadata(object)$sc3min$n_cores
     }
     
-    cl <- parallel::makeCluster(n_cores, outfile = "")
-    doParallel::registerDoParallel(cl, cores = n_cores)
+    #cl <- parallel::makeCluster(n_cores, outfile = "")
+   # doParallel::registerDoParallel(cl, cores = n_cores)
+    doFuture::registerDoFuture()
+    cl <- doFuture::makeCluster(n_cores, outfile = "")
+    plan(cluster, workers = cl)
     
     # calculate distances in parallel
     #, .export=c("calculate_distance","ED2")
     dists <- foreach::foreach(i = distances) %dorng% {
         try({
-          environment(funct$f) <- environment(calculate_distance)
-          
-            #calculate_distance(dataset, i)
-          funct$f(dataset, i)
+          #environment(funct$f) <- environment(calculate_distance)
+          #funct$f(dataset, i)
+            calculate_distance(dataset, i)
         })
     }
     
     # stop local cluster
-    parallel::stopCluster(cl)
+    #parallel::stopCluster(cl)
     
     names(dists) <- distances
     
