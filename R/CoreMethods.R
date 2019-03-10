@@ -319,7 +319,7 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
     #cl <- doFuture::makeCluster(n_cores, outfile = "")
-    doFuture::plan(cluster, workers = cl)
+    plan(cluster, workers = cl)
     
     # calculate distances in parallel
     #, .export=c("calculate_distance","ED2")
