@@ -318,7 +318,7 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     doParallel::registerDoParallel(cl, cores = n_cores)
     
     # calculate distances in parallel
-    dists <- foreach::foreach(i = distances, .export=c("calculate_distance")) %dorng% {
+    dists <- foreach::foreach(i = distances, .export=c("calculate_distance","ED2")) %dorng% {
         try({
             calculate_distance(dataset, i)
         })
@@ -543,7 +543,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   doParallel::registerDoParallel(cl, cores = n_cores)
   
   
-  cons <- foreach::foreach(i = ks, .export=c("get_consensus_matrix", "FindSimilarities")) %dorng% {
+  cons <- foreach::foreach(i = ks, .export=c("get_consensus_matrix", "FindSimilarities","ED2")) %dorng% {
     try({
       
       matrix.cols<-names(k.means)
