@@ -293,6 +293,7 @@ setMethod("sc3min_estimate_k", signature(object = "SingleCellExperiment"), sc3mi
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom doFuture registerDoFuture
+#' @importFrom future cluster plan
 sc3min_calc_dists.SingleCellExperiment <- function(object) {
     dataset <- get_processed_dataset(object)
     
@@ -319,7 +320,7 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
     #cl <- doFuture::makeCluster(n_cores, outfile = "")
-    plan("future::cluster", workers = cl)    
+    future::plan("future::cluster", workers = cl)    
     # calculate distances in parallel
     #, .export=c("calculate_distance","ED2")
     dists <- foreach(i = distances) %dorng% {
