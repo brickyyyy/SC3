@@ -289,7 +289,6 @@ setMethod("sc3min_estimate_k", signature(object = "SingleCellExperiment"), sc3mi
 #' 
 #' @return an object of \code{SingleCellExperiment} class
 #' 
-#' @importFrom doRNG %dorng%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
 #' @import doFuture
@@ -355,10 +354,11 @@ setMethod("sc3min_calc_dists", signature(object = "SingleCellExperiment"), sc3mi
 #' 
 #' @return an object of \code{SingleCellExperiment} class
 #' 
-#' @importFrom doRNG %dorng%
-#' @importFrom foreach foreach
 #' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
+#' @importFrom parallel makeCluster stopCluster
+#' @import doFuture
+#' @import future
 sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     dists <- metadata(object)$sc3min$distances
     if (is.null(dists)) {
@@ -383,17 +383,17 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
         n_cores <- metadata(object)$sc3min$n_cores
     }
     
+    doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    doParallel::registerDoParallel(cl, cores = n_cores)
+    future::plan(future::cluster, workers = cl)    
     
-    # calculate the 6 distinct transformations in parallel
-    transfs <- foreach::foreach(i = 1:nrow(hash.table), .export=c("transformation") ) %dorng% {
-        try({
-            tmp <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])
-            tmp[, 1:max(n_dim)]
-        })
+    # calculate the 3 distinct transformations in parallel
+    transfs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
+      try({
+        tmp <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])
+        tmp[, 1:max(n_dim)]
+      })
     }
-    
     # stop local cluster
     parallel::stopCluster(cl)
     
@@ -427,10 +427,11 @@ setMethod("sc3min_calc_transfs", signature(object = "SingleCellExperiment"), sc3
 #' 
 #' @return an object of \code{SingleCellExperiment} class
 #' 
-#' @importFrom doRNG %dorng%
-#' @importFrom foreach foreach
-#' @importFrom parallel makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
+#' @importFrom parallel makeCluster stopCluster
+#' @import doFuture
+#' @import future
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom stats kmeans
 sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
@@ -459,19 +460,20 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     kmeans_iter_max <- metadata(object)$sc3min$kmeans_iter_max
     kmeans_nstart <- metadata(object)$sc3min$kmeans_nstart
     
+    doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    doParallel::registerDoParallel(cl, cores = n_cores)
+    future::plan(future::cluster, workers = cl)    
     
     pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
     
     # calculate the 3 distinct transformations in parallel
-    labs <- foreach::foreach(i = 1:nrow(hash.table)) %dorng% {
-        try({
-            utils::setTxtProgressBar(pb, i)
-            transf <- get(hash.table$transf[i], transfs)
-            stats::kmeans(transf[, 1:hash.table$n_dim[i]], hash.table$ks[i], iter.max = kmeans_iter_max, 
-                nstart = kmeans_nstart)$cluster
-        })
+    labs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
+      try({
+        utils::setTxtProgressBar(pb, i)
+        transf <- get(hash.table$transf[i], transfs)
+        stats::kmeans(transf[, 1:hash.table$n_dim[i]], hash.table$ks[i], iter.max = kmeans_iter_max, 
+                      nstart = kmeans_nstart)$cluster
+      })
     }
     
     close(pb)
@@ -511,10 +513,11 @@ setMethod("sc3min_kmeans", signature(object = "SingleCellExperiment"), sc3min_km
 #' 
 #' @return an object of \code{SingleCellExperiment} class
 #' 
-#' @importFrom doRNG %dorng%
-#' @importFrom foreach foreach
-#' @importFrom parallel makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
+#' @importFrom parallel makeCluster stopCluster
+#' @import doFuture
+#' @import future
 #' @import cluster
 #' @import plyr
 #' @importFrom stats hclust dist as.dist
@@ -538,11 +541,12 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   
   message("Calculating consensus matrix...")
   
+  doFuture::registerDoFuture()
   cl <- parallel::makeCluster(n_cores, outfile = "")
-  doParallel::registerDoParallel(cl, cores = n_cores)
+  future::plan(future::cluster, workers = cl)    
   
-  
-  cons <- foreach::foreach(i = ks, .export=c("get_consensus_matrix", "FindSimilarities","ED2")) %dorng% {
+  #calculate consensus matrix for a given k or range of ks
+  cons <- foreach::foreach(i = ks) %dopar% {
     try({
       
       matrix.cols<-names(k.means)
@@ -581,7 +585,6 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   for (n in names(cons)) {
     metadata(object)$sc3min$consensus[[n]] <- cons[[n]]
   }
-  metadata(object)$sc3min$bla<-cons
   #remove kmeans results after calculating consensus
  # metadata(object)$sc3min$kmeans <- NULL
   
