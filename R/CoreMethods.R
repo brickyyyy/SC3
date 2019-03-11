@@ -319,11 +319,8 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
    # doParallel::registerDoParallel(cl, cores = n_cores)
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    #cl <- doFuture::makeCluster(n_cores, outfile = "")
     future::plan("future::cluster", workers = cl)    
-    # calculate distances in parallel
-    #, .export=c("calculate_distance","ED2")
-    dists <- foreach(i = distances) %dorng% {
+    dists <- foreach::foreach(i = distances) %dorng% {
         try({
           #environment(funct$f) <- environment(calculate_distance)
           #funct$f(dataset, i)
