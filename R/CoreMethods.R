@@ -322,8 +322,6 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     future::plan("future::cluster", workers = cl)    
     dists <- foreach::foreach(i = distances) %dorng% {
         try({
-          #environment(funct$f) <- environment(calculate_distance)
-          #funct$f(dataset, i)
             calculate_distance(dataset, i)
         })
     }
