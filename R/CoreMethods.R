@@ -292,8 +292,8 @@ setMethod("sc3min_estimate_k", signature(object = "SingleCellExperiment"), sc3mi
 #' @importFrom doRNG %dorng%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
-#' @importFrom doFuture registerDoFuture
-#' @importFrom future cluster plan
+#' @import doFuture
+#' @import future
 sc3min_calc_dists.SingleCellExperiment <- function(object) {
     dataset <- get_processed_dataset(object)
     
