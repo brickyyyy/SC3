@@ -315,17 +315,14 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
         n_cores <- metadata(object)$sc3min$n_cores
     }
     
-    #cl <- parallel::makeCluster(n_cores, outfile = "")
-   # doParallel::registerDoParallel(cl, cores = n_cores)
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    future::plan("future::cluster", workers = cl)    
+    future::plan(future::cluster, workers = cl)    
     dists <- foreach::foreach(i = distances) %dopar% {
         try({
             calculate_distance(dataset, i)
         })
     }
-    
     # stop local cluster
     parallel::stopCluster(cl)
     
