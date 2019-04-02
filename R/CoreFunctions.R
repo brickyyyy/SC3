@@ -125,6 +125,66 @@ calc_consensus<-function(matrix, k) {
   return (inputMatrix)
 }
 
+#'Multiply consensus matrices from all omics
+#'
+#'For each omics, take consensus matrix and multiply it with the consensus matrix of the other omics. Take only cells that are common 
+#'between all omics.
+#'
+#' @param objects consensus matrices from each omic
+#' @return consensus matrices of all omics
+#' @useDynLib SC3min
+#' @importFrom Rcpp sourceCpp
+get_all_consensus_matrices = function(objects){
+  all_cons = list()
+  for(i in 1:length(objects)){
+    #cons = objects[i]@metadata[["sc3min"]][["consensus"]]
+    object = objects[[i]]
+    cons = metadata(object)$sc3min$consensus
+    for(j in 1:length(cons)){
+      con = cons[[j]][["consensus"]]
+      all_cons[i][[j]] = con
+    }
+  }
+  return(all_cons)
+}
+#'Multiply consensus matrices from all omics
+#'
+#'For each omics, take consensus matrix and multiply it with the consensus matrix of the other omics. Take only cells that are common 
+#'between all omics.
+#'
+#' @param matrices consensus matrices from each omic
+#' @return consensus of all omics
+#' @useDynLib SC3min
+#' @importFrom Rcpp sourceCpp
+calculate_omics_consensus = function(matrices){
+  if(length(matrices) == 1){
+    message("only 1 matrix")
+    return(matrices[[1]])
+  }
+  else{
+    commonCells = get_common_cells(matrices)
+    res = Reduce("*", commonCells)
+    return (res)
+  }
+}
+
+#'Get common cells from all matrices
+#'
+#'For each omics, take consensus matrix and multiply it with the consensus matrix of the other omics. Take only cells that are common 
+#'between all omics.
+#'
+#' @param matrices consensus matrices from each omic
+#' @return list of matrices with the same number of cells
+#' @useDynLib SC3min
+#' @importFrom Rcpp sourceCpp
+get_common_cells = function(matrices){
+  allColumns = lapply(matrices, function(x) colnames(x))
+  desiredColumns = Reduce(intersect, allColumns)
+  #subset common columns from dataset
+  commonCells = lapply(matrices, function(x) x[which(rownames(x) %in% desiredColumns), which(colnames(x) %in% desiredColumns)] )
+  return (commonCells)
+}
+
 #' Creates a binary similarity matrix for every clustering created using the consensus algorithm and clustering with k-means after that.
 #' 
 #' Finds whether 2 cells belong to the same cluster in a given clustering result.

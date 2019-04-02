@@ -1,8 +1,8 @@
-#' Run all steps of \code{SC3min} in one go
+#' Run \code{SC3min} on a list of SingleCellExperiment objects
 #' 
 #' This function is a wrapper that executes all steps of \code{SC3min} analysis in one go.
 #' 
-#' @param object an object of \code{SingleCellExperiment} class.
+#' @param object an list of objects of \code{SingleCellExperiment} class.
 #' @param ks a range of the number of clusters \code{k} used for \code{SC3min} clustering.
 #' Can also be a single integer.
 #' @param gene_filter a boolen variable which defines whether to perform gene 
@@ -37,34 +37,99 @@
 #' @name sc3min
 #' @aliases sc3min
 #' 
-#' @return an object of \code{SingleCellExperiment} class
-sc3min.SingleCellExperiment <- function(object, ks, gene_filter, pct_dropout_min, pct_dropout_max, d_region_min, 
+#' @return list of consensus of all omics
+#' @export
+sc3min.list = function(object, ks, gene_filter, pct_dropout_min, pct_dropout_max, d_region_min, 
+                      d_region_max, svm_num_cells, svm_train_inds, svm_max, n_cores, kmeans_nstart, kmeans_iter_max, 
+                      k_estimator, biology, rand_seed) {
+   for (i in 1:length(object)) {
+     obj = object[[i]]
+     obj = sc3min_single_omic(obj, ks, gene_filter, pct_dropout_min, pct_dropout_max, d_region_min, 
+                     d_region_max, svm_num_cells, svm_train_inds, svm_max, n_cores, kmeans_nstart, kmeans_iter_max, 
+                     k_estimator, biology, rand_seed)
+     object[[i]] = obj
+   }
+  allMatrices = get_all_consensus_matrices(object)
+  #calculate consensus of all omics
+  allMatrices = calculate_omics_consensus(allMatrices)
+  #add allMatrices to metadata
+  #return (object)
+  return(allMatrices)
+  }
+#' @rdname sc3min
+#' @aliases sc3min
+setMethod("sc3min", signature(object ="list"), sc3min.list)
+
+#' Run all steps of \code{SC3min} in one go for 1 omic
+#' 
+#' This function is a wrapper that executes all steps of \code{SC3min} analysis in one go.
+#' 
+#' @param object an list of objects of \code{li} class.
+#' @param ks a range of the number of clusters \code{k} used for \code{SC3min} clustering.
+#' Can also be a single integer.
+#' @param gene_filter a boolen variable which defines whether to perform gene 
+#' filtering before SC3min clustering.
+#' @param pct_dropout_min if \code{gene_filter = TRUE}, then genes with percent of dropouts smaller than 
+#' \code{pct_dropout_min} are filtered out before clustering.
+#' @param pct_dropout_max if \code{gene_filter = TRUE}, then genes with percent of dropouts larger than 
+#' \code{pct_dropout_max} are filtered out before clustering.
+#' @param d_region_min defines the minimum number of eigenvectors used for 
+#' kmeans clustering as a fraction of the total number of cells. Default is \code{0.04}.
+#' See \code{SC3min} paper for more details.
+#' @param d_region_max defines the maximum number of eigenvectors used for 
+#' kmeans clustering as a fraction of the total number of cells. Default is \code{0.07}.
+#' See \code{SC3min} paper for more details.
+#' @param svm_num_cells number of randomly selected training cells to be used 
+#' for SVM prediction. The default is \code{NULL}.
+#' @param svm_train_inds a numeric vector defining indeces of training cells 
+#' that should be used for SVM training. The default is \code{NULL}.
+#' @param svm_max define the maximum number of cells below which SVM is not run.
+#' @param n_cores defines the number of cores to be used on the user's machine. If not set, `SC3min` will use all but one cores of your machine.
+#' @param kmeans_nstart nstart parameter passed to \code{\link[stats]{kmeans}} function. Can be set manually. By default it is 
+#' \code{1000} for up to \code{2000} cells and \code{50} for more than \code{2000} cells.
+#' @param kmeans_iter_max iter.max parameter passed to \code{\link[stats]{kmeans}} 
+#' function.
+#' @param k_estimator boolean parameter, defines whether to estimate an optimal number of clusters \code{k}. If user has already defined the ks parameter the estimation does not affect the user's paramater.
+#' @param biology boolean parameter, defines whether to compute differentially expressed genes, marker 
+#' genes and cell outliers.
+#' @param rand_seed sets the seed of the random number generator. \code{SC3min} is a stochastic
+#' method, so setting the \code{rand_seed} to a fixed values can be used for reproducibility
+#' purposes.
+#' 
+#' @name sc3min_single_omic
+#' @aliases sc3min_single_omic
+#' 
+#' @return an objects of \code{SingleCellExperiment} class
+sc3min_single_omic.SingleCellExperiment <- function(object, ks, gene_filter, pct_dropout_min, pct_dropout_max, d_region_min, 
                        d_region_max, svm_num_cells, svm_train_inds, svm_max, n_cores, kmeans_nstart, kmeans_iter_max, 
                        k_estimator, biology, rand_seed) {
+  
     object <- sc3min_prepare(object, gene_filter, pct_dropout_min, pct_dropout_max, 
         d_region_min, d_region_max, svm_num_cells, svm_train_inds, svm_max, n_cores, kmeans_nstart, 
         kmeans_iter_max, rand_seed)
-    if (k_estimator) {
+      if (k_estimator) {
         object <- sc3min_estimate_k(object)
         # Do not override cluster if user has set a k
         if (is.null(ks))
         {
             ks <- metadata(object)$sc3min$k_estimation
         }
-    }
+     }
+    
     object <- sc3min_calc_dists(object)
     object <- sc3min_calc_transfs(object)
     object <- sc3min_kmeans(object, ks)
     object <- sc3min_calc_consens(object)
     if (biology) {
-        object <- sc3min_calc_biology(object, ks)
+      object <- sc3min_calc_biology(object, ks)
     }
     return(object)
 }
 
-#' @rdname sc3min
-#' @aliases sc3min
-setMethod("sc3min", signature(object = "SingleCellExperiment"), sc3min.SingleCellExperiment)
+#' @rdname sc3min_single_omic
+#' @aliases sc3min_single_omic
+setMethod("sc3min_single_omic", signature(object ="SingleCellExperiment"), sc3min_single_omic.SingleCellExperiment)
+
 
 #' Prepare the \code{SingleCellExperiment} object for \code{SC3min} clustering.
 #' 
@@ -223,6 +288,8 @@ sc3min_prepare.SingleCellExperiment <- function(object, gene_filter, pct_dropout
         if (length(n_dim) > 15) {
             n_dim <- sample(n_dim, 15)
         }
+        #hardcode n-dim to be ==to 15
+        #n_dim = 15
     }
     
     metadata(object)$sc3min$n_dim <- n_dim
@@ -250,28 +317,60 @@ sc3min_prepare.SingleCellExperiment <- function(object, gene_filter, pct_dropout
 #' @aliases sc3min_prepare
 setMethod("sc3min_prepare", signature(object = "SingleCellExperiment"), sc3min_prepare.SingleCellExperiment)
 
-#' Estimate the optimal number of cluster \code{k} for a scRNA-Seq expression matrix
+#' Estimate the optimal number of cluster \code{k} for all omics
 #' 
 #' Uses Tracy-Widom theory on random matrices to estimate the optimal number of
 #' clusters \code{k}. It creates and populates the \code{k_estimation} item of the
 #' \code{sc3min} slot of the \code{metadata(object)}.
 #' 
 #' @name sc3min_estimate_k
-#' @aliases sc3min_estimate_k sc3min_estimate_k,SingleCellExperiment-method
+#' @aliases sc3min_estimate_k sc3min_estimate_k.list-method
+#' 
+#' @param object a list of \code{SingleCellExperiment} objects
+#' @return an estimated value of k
+sc3min_estimate_k.list <- function(object) {
+  message("Estimating k...")
+  sumOfKs = 0
+  for (i in 1:length(object)) {
+    obj = object[[i]]
+    obj = sc3min_estimate_k_single_omic(obj)
+    object[[i]] = obj
+    sumOfKs = (sumOfKs+ metadata(obj)$sc3min$k_estimation)
+  }
+  sumOfKs = as.integer(round(sumOfKs/length(object)))
+  #TODO FIGURE OUT HOW TO ADD METADATA TO A LIST
+  #attr(object, "meta") <- sumOfKs
+  #metadata(object)$sc3min$k_estimation <- sumOfKs
+  return(object)
+}
+
+#' @rdname sc3min_estimate_k
+#' @aliases sc3min_estimate_k
+setMethod("sc3min_estimate_k", signature(object = "list"), sc3min_estimate_k.list)
+
+
+#' Estimate the optimal number of cluster \code{k} for one omic
+#' 
+#' Uses Tracy-Widom theory on random matrices to estimate the optimal number of
+#' clusters \code{k}. It creates and populates the \code{k_estimation} item of the
+#' \code{sc3min} slot of the \code{metadata(object)}.
+#' 
+#' @name sc3min_estimate_k_single_omic
+#' @aliases sc3min_estimate_k_single_omic sc3min_estimate_k_single_omic,SingleCellExperiment-method
 #' 
 #' @param object an object of \code{SingleCellExperiment} class
 #' @return an estimated value of k
-sc3min_estimate_k.SingleCellExperiment <- function(object) {
-    message("Estimating k...")
+sc3min_estimate_k_single_omic.SingleCellExperiment <- function(object) {
+    #message("Estimating k...")
     dataset <- get_processed_dataset(object)
     res <- estkTW(dataset = dataset)
     metadata(object)$sc3min$k_estimation <- res
     return(object)
 }
 
-#' @rdname sc3min_estimate_k
-#' @aliases sc3min_estimate_k
-setMethod("sc3min_estimate_k", signature(object = "SingleCellExperiment"), sc3min_estimate_k.SingleCellExperiment)
+#' @rdname sc3min_estimate_k_single_omic
+#' @aliases sc3min_estimate_k_single_omic
+setMethod("sc3min_estimate_k_single_omic", signature(object = "SingleCellExperiment"), sc3min_estimate_k_single_omic.SingleCellExperiment)
 
 #' Calculate distances between the cells.
 #' 

@@ -3,16 +3,17 @@
 \docType{methods}
 \name{sc3min_estimate_k}
 \alias{sc3min_estimate_k}
-\alias{sc3min_estimate_k.SingleCellExperiment}
-\alias{sc3min_estimate_k,SingleCellExperiment-method}
-\title{Estimate the optimal number of cluster \code{k} for a scRNA-Seq expression matrix}
+\alias{sc3min_estimate_k.list}
+\alias{sc3min_estimate_k.list-method}
+\alias{sc3min_estimate_k,list-method}
+\title{Estimate the optimal number of cluster \code{k} for all omics}
 \usage{
-sc3min_estimate_k.SingleCellExperiment(object)
+sc3min_estimate_k.list(object)
 
-\S4method{sc3min_estimate_k}{SingleCellExperiment}(object)
+\S4method{sc3min_estimate_k}{list}(object)
 }
 \arguments{
-\item{object}{an object of \code{SingleCellExperiment} class}
+\item{object}{a list of \code{SingleCellExperiment} objects}
 }
 \value{
 an estimated value of k
