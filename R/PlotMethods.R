@@ -47,6 +47,57 @@ sc3min_plot_consensus.SingleCellExperiment <- function(object, k, show_pdata) {
 #' @aliases sc3min_plot_consensus
 setMethod("sc3min_plot_consensus", signature(object = "SingleCellExperiment"), sc3min_plot_consensus.SingleCellExperiment)
 
+#' Plot consensus matrix as a heatmap
+#' 
+#' The consensus matrix is a NxN 
+#' matrix, where N is the number of cells.
+#' It represents similarity between the cells based 
+#' on the averaging of clustering results from all 
+#' combinations of clustering parameters. Similarity 0 
+#' (blue) means that the two cells are always assigned to different clusters. 
+#' In contrast, similarity 1 (red) means that the two cells are always assigned 
+#' to the same cluster. The consensus matrix is clustered by hierarchical 
+#' clustering and has a diagonal-block structure. Intuitively, the perfect 
+#' clustering is achieved when all diagonal blocks are completely red 
+#' and all off-diagonal elements are completely blue.
+#' 
+#' @name sc3min_plot_consensus_omics
+#' @aliases sc3min_plot_consensus_omics
+#' 
+#' @param lis of objects of 'SingleCellExperiment' class
+#' @param k number of clusters
+#' @param show_pdata a vector of colnames of the pData(object) table. Default is NULL.
+#' If not NULL will add pData annotations to the columns of the output matrix
+#' 
+#' @importFrom pheatmap pheatmap
+#' @export
+
+sc3min_plot_consensus_omics.list <- function(object, k, show_pdata) {
+  if (is.null(metadata(object[[1]])$sc3min$omics_cons)) {
+    warning(paste0("Please run sc3min_consensus() first!"))
+    return(object)
+  }
+  obj = object[[1]]
+  hc <- metadata(obj)$sc3min$consensus[[as.character(k)]]$hc
+  consensus <- metadata(obj)$sc3min$omics_cons
+  
+  add_ann_col <- FALSE
+  ann <- NULL
+  if (!is.null(show_pdata)) {
+    ann <- make_col_ann_for_heatmaps(obj, show_pdata)
+    if (!is.null(ann)) {
+      add_ann_col <- TRUE
+      # make same names for the annotation table
+      rownames(ann) <- colnames(consensus)
+    }
+  }
+  do.call(pheatmap::pheatmap, c(list(consensus, cluster_rows = hc, cluster_cols = hc, cutree_rows = k, 
+                                     cutree_cols = k, show_rownames = FALSE, show_colnames = FALSE), list(annotation_col = ann)[add_ann_col]))
+}
+
+#' @rdname sc3min_plot_consensus_omics
+#' @aliases sc3min_plot_consensus_omics
+setMethod("sc3min_plot_consensus_omics", signature(object = "list"), sc3min_plot_consensus_omics.list)
 #' Plot silhouette indexes of the cells
 #' 
 #' A silhouette is a quantitative measure of the diagonality of the consensus 

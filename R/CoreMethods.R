@@ -51,10 +51,15 @@ sc3min.list = function(object, ks, gene_filter, pct_dropout_min, pct_dropout_max
    }
   allMatrices = get_all_consensus_matrices(object)
   #calculate consensus of all omics
-  allMatrices = calculate_omics_consensus(allMatrices)
-  #add allMatrices to metadata
-  #return (object)
-  return(allMatrices)
+  omics_cons = calculate_omics_consensus(allMatrices)
+  print(allMatrices)
+  #add allMatrices to metadata of each object
+  for(j in 1:length(object)){
+    obj = object[[j]]
+    metadata(obj)$sc3min$omics_cons <- omics_cons
+    object[[j]] = obj
+  }
+  return (object)
   }
 #' @rdname sc3min
 #' @aliases sc3min

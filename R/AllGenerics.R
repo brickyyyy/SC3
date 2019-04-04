@@ -76,6 +76,13 @@ setGeneric("sc3min_plot_consensus", signature = "object", function(object, k,
 })
 
 #' @export
+setGeneric("sc3min_plot_consensus_omics", signature = "object", function(object, k, 
+                                                                   show_pdata = NULL) {
+  standardGeneric("sc3min_plot_consensus_omics")
+})
+
+
+#' @export
 setGeneric("sc3min_plot_silhouette", signature = "object", function(object, k) {
     standardGeneric("sc3min_plot_silhouette")
 })

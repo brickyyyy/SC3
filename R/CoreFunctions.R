@@ -159,7 +159,7 @@ get_all_consensus_matrices = function(objects){
 calculate_omics_consensus = function(matrices){
   if(length(matrices) == 1){
     message("only 1 matrix")
-    return(matrices[[1]])
+    return(matrices)
   }
   else{
     commonCells = get_common_cells(matrices)
