@@ -52,7 +52,6 @@ sc3min.list = function(object, ks, gene_filter, pct_dropout_min, pct_dropout_max
   allMatrices = get_all_consensus_matrices(object)
   #calculate consensus of all omics
   omics_cons = calculate_omics_consensus(allMatrices)
-  print(allMatrices)
   #add allMatrices to metadata of each object
   for(j in 1:length(object)){
     obj = object[[j]]
@@ -308,6 +307,7 @@ sc3min_prepare.SingleCellExperiment <- function(object, gene_filter, pct_dropout
             return("Cannot define a number of available CPU cores that can be used by SC3min. Try to set the n_cores parameter in the sc3min() function call.")
         }
         # leave one core for the user
+        #print(n_cores)
         if (n_cores > 1) {
             n_cores <- n_cores - 1
         }
@@ -421,6 +421,8 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
     future::plan(future::cluster, workers = cl)    
+    #increase size so we don't get a memory exception from doFuture
+    options(future.globals.maxSize = 768 * 1024^2)
     dists <- foreach::foreach(i = distances) %dopar% {
         try({
             calculate_distance(dataset, i)
@@ -490,7 +492,8 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
     future::plan(future::cluster, workers = cl)    
-    
+    #increase size so we don't get a memory exception from doFuture
+    options(future.globals.maxSize = 768 * 1024^2)
     # calculate the 3 distinct transformations in parallel
     transfs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
       try({
@@ -505,7 +508,7 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     
     metadata(object)$sc3min$transformations <- transfs
     # remove distances after calculating transformations
-    #metadata(object)$sc3min$distances <- NULL
+    metadata(object)$sc3min$distances <- NULL
     return(object)
 }
 
@@ -566,9 +569,10 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    future::plan(future::cluster, workers = cl)    
-    
+    future::plan(future::cluster, workers = cl)   
     pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
+    #increase size so we don't get a memory exception from doFuture
+    options(future.globals.maxSize = 768 * 1024^2)
     
     # calculate the 3 distinct transformations in parallel
     labs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
@@ -586,7 +590,8 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     parallel::stopCluster(cl)
     
     names(labs) <- paste(hash.table$transf, hash.table$ks, hash.table$n_dim, sep = "_")
-    
+    #remove transformations from metadata
+    metadata(object)$sc3min$transformations <- NULL
     metadata(object)$sc3min$kmeans <- labs
     return(object)
 }
@@ -648,7 +653,8 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   doFuture::registerDoFuture()
   cl <- parallel::makeCluster(n_cores, outfile = "")
   future::plan(future::cluster, workers = cl)    
-  
+  #increase size so we don't get a memory exception from doFuture
+  options(future.globals.maxSize = 768 * 1024^2)
   #calculate consensus matrix for a given k or range of ks
   cons <- foreach::foreach(i = ks) %dopar% {
     try({
@@ -664,10 +670,22 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
-      colnames(dat) = c(1:ncol(dat))
-      rownames(dat) = c(1:nrow(dat))
+
+      if(cols(dat)<5000){
+        cells = object@colData@rownames
+        colnames(dat) <- as.character(cells)
+        rownames(dat) = colnames(dat)
+      }
+      else{
+        colnames(dat) <- c(1:ncol(dat))
+        rownames(dat) = colnames(dat)
+      }
+
+      #print(colnames(dat))
+
       tmp = ED2(dat)
-      
+      colnames(tmp) <- as.character(colnames(dat))
+      rownames(tmp) <- as.character(colnames(dat))
       diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
       
       hc <- stats::hclust(diss)
@@ -690,7 +708,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
     metadata(object)$sc3min$consensus[[n]] <- cons[[n]]
   }
   #remove kmeans results after calculating consensus
- # metadata(object)$sc3min$kmeans <- NULL
+  metadata(object)$sc3min$kmeans <- NULL
   
   p_data <- colData(object)
   for (k in ks) {
