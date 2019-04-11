@@ -508,7 +508,7 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     
     metadata(object)$sc3min$transformations <- transfs
     # remove distances after calculating transformations
-    metadata(object)$sc3min$distances <- NULL
+    #metadata(object)$sc3min$distances <- NULL
     return(object)
 }
 
@@ -591,7 +591,7 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     
     names(labs) <- paste(hash.table$transf, hash.table$ks, hash.table$n_dim, sep = "_")
     #remove transformations from metadata
-    metadata(object)$sc3min$transformations <- NULL
+   # metadata(object)$sc3min$transformations <- NULL
     metadata(object)$sc3min$kmeans <- labs
     return(object)
 }
@@ -708,7 +708,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
     metadata(object)$sc3min$consensus[[n]] <- cons[[n]]
   }
   #remove kmeans results after calculating consensus
-  metadata(object)$sc3min$kmeans <- NULL
+ # metadata(object)$sc3min$kmeans <- NULL
   
   p_data <- colData(object)
   for (k in ks) {
