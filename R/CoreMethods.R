@@ -420,7 +420,7 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    future::plan(future::cluster, workers = cl)    
+    #future::plan(future::cluster, workers = cl)    
     #increase size so we don't get a memory exception from doFuture
     options(future.globals.maxSize = 768 * 1024^2)
     dists <- foreach::foreach(i = distances, .packages = (c("future", "doFuture", "SC3min"))) %dopar% {
@@ -491,7 +491,7 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    future::plan(future::cluster, workers = cl)    
+    #future::plan(future::cluster, workers = cl)    
     #increase size so we don't get a memory exception from doFuture
     options(future.globals.maxSize = 768 * 1024^2)
     # calculate the 3 distinct transformations in parallel
@@ -569,7 +569,7 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     
     doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    future::plan(future::cluster, workers = cl)   
+    #future::plan(future::cluster, workers = cl)   
     pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
     #increase size so we don't get a memory exception from doFuture
     options(future.globals.maxSize = 768 * 1024^2)
@@ -652,7 +652,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   
   doFuture::registerDoFuture()
   cl <- parallel::makeCluster(n_cores, outfile = "")
-  future::plan(future::cluster, workers = cl)    
+  #future::plan(future::cluster, workers = cl)    
   #increase size so we don't get a memory exception from doFuture
   options(future.globals.maxSize = 768 * 1024^2)
   #calculate consensus matrix for a given k or range of ks
