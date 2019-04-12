@@ -423,7 +423,7 @@ sc3min_calc_dists.SingleCellExperiment <- function(object) {
     future::plan(future::cluster, workers = cl)    
     #increase size so we don't get a memory exception from doFuture
     options(future.globals.maxSize = 768 * 1024^2)
-    dists <- foreach::foreach(i = distances) %dopar% {
+    dists <- foreach::foreach(i = distances, .packages = (c("future", "doFuture", "SC3min"))) %dopar% {
         try({
             calculate_distance(dataset, i)
         })
@@ -495,7 +495,7 @@ sc3min_calc_transfs.SingleCellExperiment <- function(object) {
     #increase size so we don't get a memory exception from doFuture
     options(future.globals.maxSize = 768 * 1024^2)
     # calculate the 3 distinct transformations in parallel
-    transfs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
+    transfs <- foreach::foreach(i = 1:nrow(hash.table), .packages = (c("future", "doFuture", "SC3min"))) %dopar% {
       try({
         tmp <- transformation(get(hash.table[i, 1], dists), hash.table[i, 2])
         tmp[, 1:max(n_dim)]
@@ -575,7 +575,7 @@ sc3min_kmeans.SingleCellExperiment <- function(object, ks) {
     options(future.globals.maxSize = 768 * 1024^2)
     
     # calculate the 3 distinct transformations in parallel
-    labs <- foreach::foreach(i = 1:nrow(hash.table)) %dopar% {
+    labs <- foreach::foreach(i = 1:nrow(hash.table), .packages = (c("future", "doFuture", "SC3min"))) %dopar% {
       try({
         utils::setTxtProgressBar(pb, i)
         transf <- get(hash.table$transf[i], transfs)
@@ -656,7 +656,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
   #increase size so we don't get a memory exception from doFuture
   options(future.globals.maxSize = 768 * 1024^2)
   #calculate consensus matrix for a given k or range of ks
-  cons <- foreach::foreach(i = ks) %dopar% {
+  cons <- foreach::foreach(i = ks, .packages = (c("future", "doFuture", "SC3min"))) %dopar% {
     try({
       
       matrix.cols<-names(k.means)
