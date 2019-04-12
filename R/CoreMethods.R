@@ -671,7 +671,7 @@ sc3min_calc_consens.SingleCellExperiment <- function(object) {
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
 
-      if(cols(dat)<5000){
+      if(ncol(dat)<=5000){
         cells = object@colData@rownames
         colnames(dat) <- as.character(cells)
         rownames(dat) = colnames(dat)
