@@ -4,6 +4,7 @@
 \name{sc3min_estimate_k_single_omic}
 \alias{sc3min_estimate_k_single_omic}
 \alias{sc3min_estimate_k_single_omic.SingleCellExperiment}
+\alias{sc3min_estimate_k_single_omic.SingleCellExperiment-method}
 \alias{sc3min_estimate_k_single_omic,SingleCellExperiment-method}
 \title{Estimate the optimal number of cluster \code{k} for one omic}
 \usage{

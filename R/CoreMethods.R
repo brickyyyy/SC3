@@ -361,7 +361,7 @@ setMethod("sc3min_estimate_k", signature(object = "list"), sc3min_estimate_k.lis
 #' \code{sc3min} slot of the \code{metadata(object)}.
 #' 
 #' @name sc3min_estimate_k_single_omic
-#' @aliases sc3min_estimate_k_single_omic sc3min_estimate_k_single_omic,SingleCellExperiment-method
+#' @aliases sc3min_estimate_k_single_omic sc3min_estimate_k_single_omic.SingleCellExperiment-method
 #' 
 #' @param object an object of \code{SingleCellExperiment} class
 #' @return an estimated value of k
