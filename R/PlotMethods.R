@@ -77,7 +77,10 @@ sc3min_plot_consensus_omics.list <- function(object, k, show_pdata) {
     warning(paste0("Please run sc3min_consensus() first!"))
     return(object)
   }
-  obj = object[[1]]
+  #get list with the smallest number of elements
+  a = unlist(lapply(object, function(x)  x@int_colData@nrows))
+  ind = which.min(a)
+  obj = object[[ind]]
   hc <- metadata(obj)$sc3min$consensus[[as.character(k)]]$hc
   consensus <- metadata(obj)$sc3min$omics_cons
   
