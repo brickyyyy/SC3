@@ -64,7 +64,7 @@ setMethod("sc3min_plot_consensus", signature(object = "SingleCellExperiment"), s
 #' @name sc3min_plot_consensus_omics
 #' @aliases sc3min_plot_consensus_omics
 #' 
-#' @param lis of objects of 'SingleCellExperiment' class
+#' @param object a list of objects of 'SingleCellExperiment' class
 #' @param k number of clusters
 #' @param show_pdata a vector of colnames of the pData(object) table. Default is NULL.
 #' If not NULL will add pData annotations to the columns of the output matrix

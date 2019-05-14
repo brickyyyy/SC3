@@ -13,12 +13,12 @@ sc3min_plot_consensus_omics.list(object, k, show_pdata)
   show_pdata = NULL)
 }
 \arguments{
+\item{object}{a list of objects of 'SingleCellExperiment' class}
+
 \item{k}{number of clusters}
 
 \item{show_pdata}{a vector of colnames of the pData(object) table. Default is NULL.
 If not NULL will add pData annotations to the columns of the output matrix}
-
-\item{lis}{of objects of 'SingleCellExperiment' class}
 }
 \description{
 The consensus matrix is a NxN 
