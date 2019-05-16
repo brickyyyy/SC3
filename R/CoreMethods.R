@@ -673,9 +673,9 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
 
       if(ncol(dat)<=5000){
         cells = object@colData@rownames
-        print(cells)
         colnames(dat) <- as.character(cells)
         rownames(dat) = colnames(dat)
+        print("i am here")
       }
       else{
         colnames(dat) <- c(1:ncol(dat))
@@ -688,7 +688,8 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       colnames(tmp) <- as.character(colnames(dat))
       rownames(tmp) <- as.character(colnames(dat))
       diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
-      
+      print("i am here 2")
+  
       hc <- stats::hclust(diss)
       clusts <- reindex_clusters(hc, i)
       
