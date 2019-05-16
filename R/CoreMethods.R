@@ -674,8 +674,8 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       if(ncol(dat)<=5000){
         cells = object@colData@rownames
         colnames(dat) <- as.character(cells)
-        rownames(dat) = colnames(dat)
-        print("i am here")
+       # rownames(dat) = colnames(dat)
+        print(dim(dat))
       }
       else{
         colnames(dat) <- c(1:ncol(dat))
@@ -686,7 +686,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
 
       tmp = ED2(dat)
       colnames(tmp) <- as.character(colnames(dat))
-      rownames(tmp) <- as.character(colnames(dat))
+      #rownames(tmp) <- as.character(colnames(dat))
       diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
       print("i am here 2")
   
