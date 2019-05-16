@@ -673,6 +673,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
 
       if(ncol(dat)<=5000){
         cells = object@colData@rownames
+        print(cells)
         colnames(dat) <- as.character(cells)
         rownames(dat) = colnames(dat)
       }
