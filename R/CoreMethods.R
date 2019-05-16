@@ -688,7 +688,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       colnames(tmp) <- as.character(colnames(dat))
       #rownames(tmp) <- as.character(colnames(dat))
       diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
-      print("i am here 2")
+      #print("i am here 2")
   
       hc <- stats::hclust(diss)
       clusts <- reindex_clusters(hc, i)
