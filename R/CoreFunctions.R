@@ -26,7 +26,7 @@
 #'
 #' @importFrom stats cor dist
 #' 
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 #'
 calculate_distance <- function(data, method) {
@@ -73,7 +73,7 @@ transformation <- function(dists, method) {
 #' @param clusts a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 get_consensus_matrix <- function(clusts, k) {
   #res = calc_consensus(clusts, k)
@@ -105,7 +105,7 @@ get_consensus_matrix <- function(clusts, k) {
 #' @param matrix a matrix containing clustering solutions in columns
 #' @param k number of clusters
 #' @return consensus matrix
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 calc_consensus<-function(matrix, k) {
   #constructing a binary matrix for the cluster identities n
@@ -132,14 +132,14 @@ calc_consensus<-function(matrix, k) {
 #'
 #' @param objects consensus matrices from each omic
 #' @return consensus matrices of all omics
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 get_all_consensus_matrices = function(objects){
   all_cons = list()
   for(i in 1:length(objects)){
-    #cons = objects[i]@metadata[["sc3min"]][["consensus"]]
+    #cons = objects[i]@metadata[["moSC3"]][["consensus"]]
     object = objects[[i]]
-    cons = metadata(object)$sc3min$consensus
+    cons = metadata(object)$moSC3$consensus
     for(j in 1:length(cons)){
       con = cons[[j]][["consensus"]]
       all_cons[i][[j]] = con
@@ -154,7 +154,7 @@ get_all_consensus_matrices = function(objects){
 #'
 #' @param matrices consensus matrices from each omic
 #' @return consensus of all omics
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 calculate_omics_consensus = function(matrices){
   if(length(matrices) == 1){
@@ -177,7 +177,7 @@ calculate_omics_consensus = function(matrices){
 #'
 #' @param matrices consensus matrices from each omic
 #' @return list of matrices with the same number of cells
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 get_common_cells = function(matrices){
   allColumns = lapply(matrices, function(x) colnames(x))
@@ -193,7 +193,7 @@ get_common_cells = function(matrices){
 #' 
 #' @param v vector containing clustering results
 #' @return binary similarity matrix
-#' @useDynLib SC3min
+#' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 FindSimilarities = function(v){
   l = length(v)
@@ -304,10 +304,10 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
         }
     }
     ann <- NULL
-    if (is.null(metadata(object)$sc3min$svm_train_inds)) {
+    if (is.null(metadata(object)$moSC3$svm_train_inds)) {
         ann <- colData(object)[, colnames(colData(object)) %in% show_pdata]
     } else {
-        ann <- colData(object)[metadata(object)$sc3min$svm_train_inds, colnames(colData(object)) %in% 
+        ann <- colData(object)[metadata(object)$moSC3$svm_train_inds, colnames(colData(object)) %in% 
             show_pdata]
     }
     # remove columns with 1 value only
@@ -351,7 +351,7 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
     return(ann)
 }
 
-#' Get processed dataset used by \code{SC3min} clustering
+#' Get processed dataset used by \code{moSC3} clustering
 #' 
 #' Takes data from the \code{logcounts} slot, removes spike-ins and applies the gene filter.
 #' 
@@ -362,8 +362,8 @@ make_col_ann_for_heatmaps <- function(object, show_pdata) {
 #' @export
 get_processed_dataset <- function(object) {
     dataset <- logcounts(object)
-    if (!is.null(rowData(object)$sc3min_gene_filter)) {
-        dataset <- dataset[rowData(object)$sc3min_gene_filter, ]
+    if (!is.null(rowData(object)$moSC3_gene_filter)) {
+        dataset <- dataset[rowData(object)$moSC3_gene_filter, ]
     }
     return(dataset)
 }

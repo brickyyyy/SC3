@@ -1,4 +1,4 @@
-Package: SC3min
+Package: moSC3
 Type: Package
 Title: Minimal Single-Cell Consensus Clustering
 Version: 1.0.1

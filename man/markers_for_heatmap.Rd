@@ -8,9 +8,9 @@ markers_for_heatmap(markers)
 }
 \arguments{
 \item{markers}{a \code{data.frame} object with the following colnames:
-\code{sc3min_k_markers_clusts}, \code{sc3min_k_markers_auroc}, \code{sc3min_k_markers_padj}.}
+\code{moSC3_k_markers_clusts}, \code{moSC3_k_markers_auroc}, \code{moSC3_k_markers_padj}.}
 }
 \description{
-Reorders the rows of the input data.frame based on the \code{sc3min_k_markers_clusts}
-column and also keeps only the top 10 genes for each value of \code{sc3min_k_markers_clusts}.
+Reorders the rows of the input data.frame based on the \code{moSC3_k_markers_clusts}
+column and also keeps only the top 10 genes for each value of \code{moSC3_k_markers_clusts}.
 }

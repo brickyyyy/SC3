@@ -7,7 +7,7 @@
 #' 
 #' @param x A numeric matrix.
 ED1 <- function(x) {
-    .Call('_SC3min_ED1', PACKAGE = 'SC3min', x)
+    .Call('_moSC3_ED1', PACKAGE = 'moSC3', x)
 }
 
 #' Compute Euclidean distance matrix by columns
@@ -17,7 +17,7 @@ ED1 <- function(x) {
 #' 
 #' @param x A numeric matrix.
 ED2 <- function(x) {
-    .Call('_SC3min_ED2', PACKAGE = 'SC3min', x)
+    .Call('_moSC3_ED2', PACKAGE = 'moSC3', x)
 }
 
 #' Graph Laplacian calculation
@@ -27,7 +27,7 @@ ED2 <- function(x) {
 #' @param A symmetric matrix
 #' @export
 norm_laplacian <- function(A) {
-    .Call('_SC3min_norm_laplacian', PACKAGE = 'SC3min', A)
+    .Call('_moSC3_norm_laplacian', PACKAGE = 'moSC3', A)
 }
 
 #' Matrix left-multiplied by its transpose
@@ -36,6 +36,6 @@ norm_laplacian <- function(A) {
 #' 
 #' @param x Numeric matrix.
 tmult <- function(x) {
-    .Call('_SC3min_tmult', PACKAGE = 'SC3min', x)
+    .Call('_moSC3_tmult', PACKAGE = 'moSC3', x)
 }
 
