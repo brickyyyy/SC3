@@ -671,25 +671,24 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
 
-      if(ncol(dat)<=5000){
-        cells = object@colData@rownames
-        colnames(dat) <- as.character(cells)
-       # rownames(dat) = colnames(dat)
-        print(dim(dat))
-      }
-      else{
-        colnames(dat) <- c(1:ncol(dat))
-        rownames(dat) = colnames(dat)
-      }
+      # if(ncol(dat)<=5000){
+      #   cells = object@colData@rownames
+      #   colnames(dat) <- as.character(cells)
+      #  # rownames(dat) = colnames(dat)
+      #   print(dim(dat))
+      # }
+      # else{
+      #   colnames(dat) <- c(1:ncol(dat))
+      #   rownames(dat) = colnames(dat)
+      # }
 
       #print(colnames(dat))
 
       tmp = ED2(dat)
       colnames(tmp) <- as.character(colnames(dat))
-      #rownames(tmp) <- as.character(colnames(dat))
+      rownames(tmp) <- as.character(colnames(dat))
       diss <- stats::as.dist(as.matrix(stats::as.dist(tmp)))
-      #print("i am here 2")
-  
+
       hc <- stats::hclust(diss)
       clusts <- reindex_clusters(hc, i)
       
