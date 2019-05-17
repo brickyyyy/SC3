@@ -535,6 +535,7 @@ setMethod("moSC3_calc_transfs", signature(object = "SingleCellExperiment"), moSC
 #' @return an object of \code{SingleCellExperiment} class
 #' 
 #' @importFrom doParallel registerDoParallel
+#' @importFrom doRNG %dorng%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
 #' @import doFuture
@@ -566,22 +567,18 @@ moSC3_kmeans.SingleCellExperiment <- function(object, ks) {
     
     kmeans_iter_max <- metadata(object)$moSC3$kmeans_iter_max
     kmeans_nstart <- metadata(object)$moSC3$kmeans_nstart
-    
-    doFuture::registerDoFuture()
     cl <- parallel::makeCluster(n_cores, outfile = "")
-    #future::plan(future::cluster, workers = cl)   
-    pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
-    #increase size so we don't get a memory exception from doFuture
-    options(future.globals.maxSize = 850*1024^2)
+    doParallel::registerDoParallel(cl, cores = n_cores)
     
-    # calculate the 3 distinct transformations in parallel
-    labs <- foreach::foreach(i = 1:nrow(hash.table), .packages = (c("future", "doFuture", "moSC3"))) %dopar% {
+    pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
+    
+    # calculate the 6 distinct transformations in parallel
+    labs <- foreach::foreach(i = 1:nrow(hash.table)) %dorng% {
       try({
         utils::setTxtProgressBar(pb, i)
         transf <- get(hash.table$transf[i], transfs)
         stats::kmeans(transf[, 1:hash.table$n_dim[i]], hash.table$ks[i], iter.max = kmeans_iter_max, 
                       nstart = kmeans_nstart)$cluster
-        gc()
       })
     }
     
@@ -670,7 +667,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
-      colnames(dat) = as.character(c(1:nrow(clusts)))
+      colnames(dat) = as.character(c(1:nrow(dat)))
       # if(ncol(dat)<=5000){
       #   cells = object@colData@rownames
       #   colnames(dat) <- as.character(cells)
