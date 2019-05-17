@@ -422,7 +422,7 @@ moSC3_calc_dists.SingleCellExperiment <- function(object) {
     cl <- parallel::makeCluster(n_cores, outfile = "")
     #future::plan(future::cluster, workers = cl)    
     #increase size so we don't get a memory exception from doFuture
-    options(future.globals.maxSize = 768 * 1024^2)
+    options(future.globals.maxSize = 850*1024^2)
     dists <- foreach::foreach(i = distances, .packages = (c("future", "doFuture", "moSC3"))) %dopar% {
         try({
             calculate_distance(dataset, i)
@@ -493,7 +493,7 @@ moSC3_calc_transfs.SingleCellExperiment <- function(object) {
     cl <- parallel::makeCluster(n_cores, outfile = "")
     #future::plan(future::cluster, workers = cl)    
     #increase size so we don't get a memory exception from doFuture
-    options(future.globals.maxSize = 768 * 1024^2)
+    options(future.globals.maxSize = 850*1024^2)
     # calculate the 3 distinct transformations in parallel
     transfs <- foreach::foreach(i = 1:nrow(hash.table), .packages = (c("future", "doFuture", "moSC3"))) %dopar% {
       try({
@@ -572,7 +572,7 @@ moSC3_kmeans.SingleCellExperiment <- function(object, ks) {
     #future::plan(future::cluster, workers = cl)   
     pb <- utils::txtProgressBar(min = 1, max = nrow(hash.table), style = 3)
     #increase size so we don't get a memory exception from doFuture
-    options(future.globals.maxSize = 768 * 1024^2)
+    options(future.globals.maxSize = 850*1024^2)
     
     # calculate the 3 distinct transformations in parallel
     labs <- foreach::foreach(i = 1:nrow(hash.table), .packages = (c("future", "doFuture", "moSC3"))) %dopar% {
@@ -581,6 +581,7 @@ moSC3_kmeans.SingleCellExperiment <- function(object, ks) {
         transf <- get(hash.table$transf[i], transfs)
         stats::kmeans(transf[, 1:hash.table$n_dim[i]], hash.table$ks[i], iter.max = kmeans_iter_max, 
                       nstart = kmeans_nstart)$cluster
+        gc()
       })
     }
     
@@ -654,7 +655,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
   cl <- parallel::makeCluster(n_cores, outfile = "")
   #future::plan(future::cluster, workers = cl)    
   #increase size so we don't get a memory exception from doFuture
-  options(future.globals.maxSize = 768 * 1024^2)
+  options(future.globals.maxSize = 850*1024^2)
   #calculate consensus matrix for a given k or range of ks
   cons <- foreach::foreach(i = ks, .packages = (c("future", "doFuture", "moSC3"))) %dopar% {
     try({
@@ -666,11 +667,10 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       
       res <- get_consensus_matrix(matrix.toCluster, i)
       dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
-      
+      colnames(dat) = as.character(c(1:nrow(clusts)))
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
-      print(dim(dat))
       # if(ncol(dat)<=5000){
       #   cells = object@colData@rownames
       #   colnames(dat) <- as.character(cells)
