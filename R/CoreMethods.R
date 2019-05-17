@@ -667,10 +667,10 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       
       res <- get_consensus_matrix(matrix.toCluster, i)
       dat<-matrix(data=res$cluster, ncol = length(res$cluster)/i, nrow = i)
-      colnames(dat) = as.character(c(1:nrow(clusts)))
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
+      colnames(dat) = as.character(c(1:nrow(clusts)))
       # if(ncol(dat)<=5000){
       #   cells = object@colData@rownames
       #   colnames(dat) <- as.character(cells)
