@@ -670,7 +670,7 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       toList = plyr::alply(dat,1)
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
-
+      print(dim(dat))
       # if(ncol(dat)<=5000){
       #   cells = object@colData@rownames
       #   colnames(dat) <- as.character(cells)
