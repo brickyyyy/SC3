@@ -165,7 +165,7 @@ calculate_omics_consensus = function(matrices){
     commonCells = get_common_cells(matrices)
     res = Reduce("*", commonCells)
     colnames(res) = colnames(commonCells[[1]])
-    rownames(res) = colnames(res)
+    rownames(res) = colnames(commonCells[[1]])
     return (res)
   }
 }
