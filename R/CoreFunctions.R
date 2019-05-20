@@ -180,10 +180,10 @@ calculate_omics_consensus = function(matrices){
 #' @useDynLib moSC3
 #' @importFrom Rcpp sourceCpp
 get_common_cells = function(matrices){
-  allColumns = lapply(matrices, function(x) colnames(x))
+  allColumns = lapply(matrices, function(x) as.character(colnames(x)))
   desiredColumns = Reduce(intersect, allColumns)
   #subset common columns from dataset
-  commonCells = lapply(matrices, function(x) x[which(rownames(x) %in% desiredColumns), which(colnames(x) %in% desiredColumns)] )
+  commonCells = lapply(matrices, function(x) x[which(as.character(rownames(x)) %in% desiredColumns), which(as.character(colnames(x)) %in% desiredColumns)] )
   return (commonCells)
 }
 
