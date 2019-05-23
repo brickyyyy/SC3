@@ -112,8 +112,8 @@ calc_consensus<-function(matrix, k) {
   n = ncol(matrix)
   c = nrow(matrix)
   b = matrix(0L,nrow = n,ncol = c*k)
-  message("Calculating consensus matrix...")
-  for (i in 1:n) {
+
+    for (i in 1:n) {
     for (j in 1:c) {
       value = matrix[j,i]+k*(j-1)
       b[i,value] <- 1

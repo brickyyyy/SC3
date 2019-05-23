@@ -668,18 +668,6 @@ moSC3_calc_consens.SingleCellExperiment <- function(object) {
       allCons = lapply(toList,FUN = FindSimilarities)
       dat = Reduce("+", allCons)
       colnames(dat) = as.character(c(1:nrow(dat)))
-      # if(ncol(dat)<=5000){
-      #   cells = object@colData@rownames
-      #   colnames(dat) <- as.character(cells)
-      #  # rownames(dat) = colnames(dat)
-      #   print(dim(dat))
-      # }
-      # else{
-      #   colnames(dat) <- c(1:ncol(dat))
-      #   rownames(dat) = colnames(dat)
-      # }
-
-      #print(colnames(dat))
 
       tmp = ED2(dat)
       colnames(tmp) <- as.character(colnames(dat))
