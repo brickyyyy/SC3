@@ -7,7 +7,7 @@
 calculate_stability(consensus, k)
 }
 \arguments{
-\item{consensus}{consensus item of the sc3min slot of an object of 'SingleCellExperiment' class}
+\item{consensus}{consensus item of the moSC3 slot of an object of 'SingleCellExperiment' class}
 
 \item{k}{number of clusters k}
 }
@@ -21,7 +21,7 @@ The stability index varies between 0 and 1, where
 }
 \details{
 Imagine a given cluster is split into \code{N} clusters when \code{k} is changed (all possible
-values of \code{k} are provided via \code{ks} argument in the main \code{sc3min} function). 
+values of \code{k} are provided via \code{ks} argument in the main \code{moSC3} function). 
 In each of the new clusters there are \code{given_cells} of the given cluster and also some 
 \code{extra_cells} from other clusters. Then we define stability as follows:
 

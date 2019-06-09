@@ -2,7 +2,7 @@
 % Please edit documentation in R/CoreFunctions.R
 \name{get_processed_dataset}
 \alias{get_processed_dataset}
-\title{Get processed dataset used by \code{SC3min} clustering}
+\title{Get processed dataset used by \code{moSC3} clustering}
 \usage{
 get_processed_dataset(object)
 }
